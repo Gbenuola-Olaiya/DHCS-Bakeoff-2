@@ -21,6 +21,9 @@ float logoY = 500;
 float logoZ = 50f;
 float logoRotation = 0;
 
+boolean dragging = false;
+float offsetX, offsetY;
+
 private class Destination
 {
   float x = 0;
@@ -154,10 +157,26 @@ void mousePressed()
     startTime = millis();
     println("time started!");
   }
+
+  float halfSize = logoZ / 2;
+  if (mouseX > logoX - halfSize && mouseX < logoX + halfSize && mouseY > logoY - halfSize && mouseY < logoY + halfSize) {
+    dragging = true;
+    offsetX = mouseX - logoX;
+    offsetY = mouseY - logoY;
+  }
+}
+
+void mouseDragged() {
+  if (dragging) {
+    logoX = mouseX - offsetX;
+    logoY = mouseY - offsetY;
+  }
 }
 
 void mouseReleased()
 {
+
+  dragging = false;
   //check to see if user clicked middle of screen within 3 inches, which this code uses as a submit button
   if (dist(width/2, height/2, mouseX, mouseY)<inchToPix(3f))
   {
