@@ -21,6 +21,9 @@ float logoY = 500;
 float logoZ = 50f;
 float logoRotation = 0;
 
+boolean dragging = false;
+float offsetX, offsetY;
+
 private class Destination
 {
   float x = 0;
@@ -116,7 +119,7 @@ void draw() {
 
   //===========DRAW LOGO SQUARE=================
   pushMatrix();
-  translate(logoX, logoY); //translate draw center to the center oft he logo square
+  translate(logoX, logoY); //translate draw center to the center of the logo square
   rotate(radians(logoRotation)); //rotate using the logo square as the origin
   noStroke();
   fill(60, 60, 192, 192);
@@ -196,10 +199,24 @@ void mousePressed()
     startTime = millis();
     println("time started!");
   }
+  float halfSize = logoZ / 2;
+  if (mouseX > logoX - halfSize && mouseX < logoX + halfSize && mouseY > logoY - halfSize && mouseY < logoY + halfSize) {
+    dragging = true;
+    offsetX = mouseX - logoX;
+    offsetY = mouseY - logoY;
+  }
+}
+
+void mouseDragged() {
+  if (dragging) {
+    logoX = mouseX - offsetX;
+    logoY = mouseY - offsetY;
+  }
 }
 
 void mouseReleased()
 {
+  dragging = false;
   int submit_button_width = 100;
   int submit_button_height = 50;
   int submit_button_x = width/2;
