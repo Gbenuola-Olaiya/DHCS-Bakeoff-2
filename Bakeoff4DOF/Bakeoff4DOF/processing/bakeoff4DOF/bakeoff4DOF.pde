@@ -59,7 +59,12 @@ void setup() {
   Collections.shuffle(destinations); // randomize the order of the button; don't change this.
 }
 
+int submit_button_x = width/2;
+int submit_button_y = height/2;
+int submit_button_width = 100;
+int submit_button_height = 50;
 
+color button_color;
 
 void draw() {
 
@@ -107,6 +112,25 @@ void draw() {
   fill(255);
   scaffoldControlLogic(); //you are going to want to replace this!
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchToPix(.8f));
+
+  //===========DRAW SUBMIT BUTTON=====================
+  if (!checkForSuccess()){
+    button_color = color(255, 0, 0);
+  }
+  else{
+    button_color = color(0, 255, 0);
+  }
+  fill(button_color);
+  int submit_button_width = 100;
+  int submit_button_height = 50;
+  int submit_button_x = width/2;
+  int submit_button_y = height/2;
+  rect(submit_button_x, submit_button_y, submit_button_width, submit_button_height);
+  
+  // Make Button Text White
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text("Submit", submit_button_x, submit_button_y);
 }
 
 //my example design for control, which is terrible
@@ -175,7 +199,6 @@ void mouseDragged() {
 
 void mouseReleased()
 {
-
   dragging = false;
   //check to see if user clicked middle of screen within 3 inches, which this code uses as a submit button
   if (dist(width/2, height/2, mouseX, mouseY)<inchToPix(3f))
