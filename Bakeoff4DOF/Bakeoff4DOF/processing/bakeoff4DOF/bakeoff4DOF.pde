@@ -22,6 +22,7 @@ float logoZ = 50f;
 float logoRotation = 0;
 
 boolean dragging = false;
+boolean resizing = false;
 float offsetX, offsetY;
 
 private class Destination
@@ -123,8 +124,8 @@ void draw() {
   fill(button_color);
   int submit_button_width = 100;
   int submit_button_height = 50;
-  int submit_button_x = width/2;
-  int submit_button_y = height/2;
+  int submit_button_x = width/2
+  int submit_button_y = height/2
   rect(submit_button_x, submit_button_y, submit_button_width, submit_button_height);
   
   // Make Button Text White
@@ -183,7 +184,19 @@ void mousePressed()
   }
 
   float halfSize = logoZ / 2;
-  if (mouseX > logoX - halfSize && mouseX < logoX + halfSize && mouseY > logoY - halfSize && mouseY < logoY + halfSize) {
+  // four corners
+  float topLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY - halfSize);
+  float topRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY - halfSize);
+  float bottomLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY + halfSize);
+  float bottomRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY + halfSize);
+  
+  // checking if close to any corner
+  if (topLeftDist < 10 || topRightDist < 10 || bottomLeftDist < 10 || bottomRightDist < 10) {
+    resizing = true;
+  }
+  
+  // if it's not a resizing then it's a dragndrop
+  else if (mouseX > logoX - halfSize && mouseX < logoX + halfSize && mouseY > logoY - halfSize && mouseY < logoY + halfSize) {
     dragging = true;
     offsetX = mouseX - logoX;
     offsetY = mouseY - logoY;
@@ -191,14 +204,19 @@ void mousePressed()
 }
 
 void mouseDragged() {
-  if (dragging) {
+  if (dragging == true) {
     logoX = mouseX - offsetX;
     logoY = mouseY - offsetY;
+  }
+  if (resizing == true) {
+    float newHalfSize = dist(mouseX, mouseY, logoX, logoY) / 2;
+    logoZ = newHalfSize * 2;
   }
 }
 
 void mouseReleased()
 {
+  resizing = false;
   dragging = false;
   //check to see if user clicked middle of screen within 3 inches, which this code uses as a submit button
   if (dist(width/2, height/2, mouseX, mouseY)<inchToPix(3f))
