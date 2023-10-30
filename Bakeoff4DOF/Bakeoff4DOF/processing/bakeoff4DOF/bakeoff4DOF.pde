@@ -25,6 +25,10 @@ float logoX = 500;
 float logoY = 500;
 float logoZ = 50f;
 float logoRotation = 0;
+float rotateButtonX = logoX + logoZ / 2 + 30; // Adjust the distance from the logo square as needed
+float rotateButtonY = logoY; // Adjust the vertical position as needed
+float rotateButtonSize = 40; // Adjust the size of the button as needed
+
 
 boolean dragging = false;
 float offsetX, offsetY;
@@ -165,6 +169,38 @@ void draw() {
   text("Hits: " + successes,40, 70);
   text("Errors: " + errorCount,40, 90);
   textAlign(CENTER);
+  
+  // Update button position with logo position
+  float buttonSize = logoZ / 2; // Adjust the size of the button relative to the logo size
+  rotateButtonX = logoX;
+  rotateButtonY = logoY - logoZ / 2 - buttonSize / 2; // Adjust the vertical position
+
+  // Draw circular button
+  fill(255);
+  ellipse(rotateButtonX, rotateButtonY, buttonSize, buttonSize);
+
+  // Draw arrow icons for rotating logo square
+  fill(0);
+  float arrowSize = buttonSize / 3;
+  float arrowOffset = buttonSize / 3.25; // Spacing Between Clockwise and Counter Clockwise arrows
+  float arrowTopY = rotateButtonY - arrowOffset;
+  float arrowLeftX = rotateButtonX - arrowSize / 2;
+  float arrowRightX = rotateButtonX + arrowSize / 2;
+  float arrowBottomY = rotateButtonY + arrowSize / 2 - arrowOffset;
+
+  triangle(arrowLeftX - arrowSize / 4, arrowTopY, arrowRightX - arrowSize / 4, arrowTopY, rotateButtonX - arrowSize / 4, arrowTopY - arrowSize / 2);
+  triangle(arrowLeftX + arrowSize / 4, arrowBottomY, arrowRightX + arrowSize / 4, arrowBottomY, rotateButtonX + arrowSize / 4, arrowBottomY + arrowSize / 2);
+
+  // Check for button click
+  float distance = dist(mouseX, mouseY, rotateButtonX, rotateButtonY);
+  if (distance < buttonSize / 2 && mousePressed) {
+    // Check if the mouse is on the right or left side of the button to determine the direction of rotation
+    if (mouseX < rotateButtonX) {
+      logoRotation -= 2; // Adjust the rotation speed as needed
+    } else {
+      logoRotation += 2; // Adjust the rotation speed as needed
+    }
+  }
 }
 
 //my example design for control, which is terrible
