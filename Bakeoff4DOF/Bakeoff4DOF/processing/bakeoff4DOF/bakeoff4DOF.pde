@@ -170,6 +170,7 @@ void draw() {
   text("Errors: " + errorCount,40, 90);
   textAlign(CENTER);
   
+  //===========DRAW ROTATE BUTTONS===========================
   // Update button position with logo position
   float buttonSize = logoZ / 2; // Adjust the size of the button relative to the logo size
   rotateButtonX = logoX;
@@ -201,20 +202,83 @@ void draw() {
       logoRotation += 2; // Adjust the rotation speed as needed
     }
   }
+  
+  //===========DRAW INDICATOR BUTTONS=====================
+  // SIZE INDICATOR
+  color color1;
+  if (!closeZ()){
+    color1 = color(255, 0, 0);
+  }
+  else{
+    color1 = color(0, 255, 0);
+  }
+  fill(color1);
+  int button_width = 75;
+  int button_height = 45;
+  int button_x = 60;
+  int button_y = height/2 - 50;
+  rect(button_x, button_y, button_width, button_height);
+
+  // Make Button Text White
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text("SIZE", button_x, button_y);
+
+  // DISTANCE INDICATOR
+
+  color color2;
+  if (!closeDist()){
+    color2 = color(255, 0, 0);
+  }
+  else{
+    color2 = color(0, 255, 0);
+  }
+  fill(color2);
+  int button_width2 = 75;
+  int button_height2 = 45;
+  int button_x2 = 60;
+  int button_y2 = height/2;
+  rect(button_x2, button_y2, button_width2, button_height2);
+
+  // Make Button Text White
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text("PLACE", button_x2, button_y2);
+
+  // ROTATION INDICATOR
+
+  color color3;
+  if (!closeRotation()){
+    color3 = color(255, 0, 0);
+  }
+  else{
+    color3 = color(0, 255, 0);
+  }
+  fill(color3);
+  int button_width3 = 75;
+  int button_height3 = 45;
+  int button_x3 = 60;
+  int button_y3 = height/2 + 50;
+  rect(button_x3, button_y3, button_width3, button_height3);
+
+  // Make Button Text White
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text("ANGLE", button_x3, button_y3);
 }
 
 //my example design for control, which is terrible
 void scaffoldControlLogic()
 {
   //upper left corner, rotate counterclockwise
-  text("CCW", inchToPix(.4f), inchToPix(.4f));
+  /* text("CCW", inchToPix(.4f), inchToPix(.4f));
   if (mousePressed && dist(0, 0, mouseX, mouseY)<inchToPix(.8f))
     logoRotation--;
 
   //upper right corner, rotate clockwise
   text("CW", width-inchToPix(.4f), inchToPix(.4f));
   if (mousePressed && dist(width, 0, mouseX, mouseY)<inchToPix(.8f))
-    logoRotation++;
+    logoRotation++;*/
 
   //lower left corner, decrease Z
   text("-", inchToPix(.4f), height-inchToPix(.4f));
@@ -227,7 +291,7 @@ void scaffoldControlLogic()
     logoZ = constrain(logoZ+inchToPix(.02f), .01, inchToPix(4f)); //leave min and max alone! 
 
   //left middle, move left
-  text("left", inchToPix(.4f), height/2);
+  /* text("left", inchToPix(.4f), height/2);
   if (mousePressed && dist(0, height/2, mouseX, mouseY)<inchToPix(.8f))
     logoX-=inchToPix(.02f);
 
@@ -242,6 +306,7 @@ void scaffoldControlLogic()
   text("down", width/2, height-inchToPix(.4f));
   if (mousePressed && dist(width/2, height, mouseX, mouseY)<inchToPix(.8f))
     logoY+=inchToPix(.02f);
+  */
 }
 
 void mousePressed()
@@ -260,7 +325,7 @@ void mousePressed()
 }
 
 void mouseDragged() {
-  if (dragging) {
+if (dragging) {
     logoX = mouseX - offsetX;
     logoY = mouseY - offsetY;
   }
@@ -295,6 +360,30 @@ void mouseReleased()
       finishTime = millis();
     }
   }
+}
+
+public boolean closeDist()
+{
+  Destination d = destinations.get(trialIndex);  
+  boolean closeDist = dist(d.x, d.y, logoX, logoY)<inchToPix(.05f); //has to be within +-0.05"
+
+  return closeDist;
+}
+
+public boolean closeRotation()
+{
+  Destination d = destinations.get(trialIndex);  
+  boolean closeRotation = calculateDifferenceBetweenAngles(d.rotation, logoRotation)<=5;
+
+  return closeRotation;
+}
+
+public boolean closeZ()
+{
+  Destination d = destinations.get(trialIndex);  
+  boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"  
+
+  return closeZ;
 }
 
 //probably shouldn't modify this, but email me if you want to for some good reason.
