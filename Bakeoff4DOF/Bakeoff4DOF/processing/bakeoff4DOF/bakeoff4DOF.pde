@@ -1,3 +1,5 @@
+import processing.sound.*;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -6,11 +8,14 @@ int index = 0; //starts at zero-ith trial
 float border = 0; //some padding from the sides of window, set later
 int trialCount = 12; //this will be set higher for the bakeoff
 int trialIndex = 0; //what trial are we on
+int successes = 0; //used to keep track of number of successes
 int errorCount = 0;  //used to keep track of errors
 float errorPenalty = 0.5f; //for every error, add this value to mean time
 int startTime = 0; // time starts when the first click is captured
 int finishTime = 0; //records the time of the final click
 boolean userDone = false; //is the user done
+SoundFile hit;
+SoundFile miss;
 
 final int screenPPI = 72; //what is the DPI of the screen you are using
 //you can test this by drawing a 72x72 pixel rectangle in code, and then confirming with a ruler it is 1x1 inch. 
@@ -20,6 +25,14 @@ float logoX = 500;
 float logoY = 500;
 float logoZ = 50f;
 float logoRotation = 0;
+float rotateButtonX = logoX + logoZ / 2 + 30; // Adjust the distance from the logo square as needed
+float rotateButtonY = logoY; // Adjust the vertical position as needed
+float rotateButtonSize = 40; // Adjust the size of the button as needed
+
+boolean dragging = false;
+boolean resizing = false;
+boolean rotating = false;
+float offsetX, offsetY;
 
 private class Destination
 {
@@ -40,6 +53,9 @@ void setup() {
   
   //don't change this! 
   border = inchToPix(2f); //padding of 1.0 inches
+  
+  hit = new SoundFile(this, "hit_sound.wav");
+  miss = new SoundFile(this, "miss_sound.wav");
 
   for (int i=0; i<trialCount; i++) //don't change this! 
   {
@@ -56,6 +72,14 @@ void setup() {
   Collections.shuffle(destinations); // randomize the order of the button; don't change this.
 }
 
+int submit_button_x = width/2;
+int submit_button_y = height/2;
+int submit_button_width = 100;
+int submit_button_height = 50;
+
+color button_color;
+// Adjust the minimum size for the rotation controls
+final float minButtonSize = 20;
 
 
 void draw() {
@@ -104,12 +128,140 @@ void draw() {
   fill(255);
   scaffoldControlLogic(); //you are going to want to replace this!
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchToPix(.8f));
+
+  //===========DRAW SUCCESSES AND ERRORS=====================
+  textAlign(LEFT);
+  fill(255);
+  text("Hits: " + successes,40, 60);
+  text("Errors: " + errorCount,40, 80);
+  textAlign(CENTER);
+  
+  //===========DRAW ROTATE BUTTONS===========================
+  // Update button position with logo position
+  // Draw circular button with a minimum size
+  float buttonSize = max(logoZ / 2, minButtonSize);
+  rotateButtonX = logoX;
+  rotateButtonY = logoY - logoZ / 2 - buttonSize / 2; // Adjust the vertical position
+
+  // Draw circular button
+  fill(255);
+  ellipse(rotateButtonX, rotateButtonY, buttonSize, buttonSize);
+
+  // Draw arrow icons for rotating logo square
+  fill(0);
+  // Draw arrow icons for rotating logo square with a minimum size
+  float arrowSize = max(buttonSize / 3, minButtonSize / 3);
+  float arrowOffset = buttonSize / 3.25; // Spacing Between Clockwise and Counter Clockwise arrows
+  float arrowTopY = rotateButtonY - arrowOffset;
+  float arrowLeftX = rotateButtonX - arrowSize / 2;
+  float arrowRightX = rotateButtonX + arrowSize / 2;
+  float arrowBottomY = rotateButtonY + arrowSize / 2 - arrowOffset;
+
+  triangle(arrowLeftX - arrowSize / 4, arrowTopY, arrowRightX - arrowSize / 4, arrowTopY, rotateButtonX - arrowSize / 4, arrowTopY - arrowSize / 2);
+  triangle(arrowLeftX + arrowSize / 4, arrowBottomY, arrowRightX + arrowSize / 4, arrowBottomY, rotateButtonX + arrowSize / 4, arrowBottomY + arrowSize / 2);
+
+  // Check for button click
+  /*float distance = dist(mouseX, mouseY, rotateButtonX, rotateButtonY);
+  if (distance < buttonSize / 2 && mousePressed && rotating == true) {
+    // Check if the mouse is on the right or left side of the button to determine the direction of rotation
+    if (mouseX < rotateButtonX) {
+      logoRotation -= 5; // Adjust the rotation speed as needed
+    } else {
+      logoRotation += 5; // Adjust the rotation speed as needed
+    }
+    rotating = false;
+  }*/
+  
+  //===========DRAW INDICATOR BUTTONS=====================
+  // SIZE INDICATOR
+  color color1;
+  if (!closeZ()){
+    color1 = color(255, 0, 0);
+  }
+  else{
+    color1 = color(0, 255, 0);
+  }
+  fill(color1);
+  int button_width = 75;
+  int button_height = 45;
+  int button_x = 60;
+  int button_y = height/2 - 50;
+  rect(button_x, button_y, button_width, button_height);
+
+  // Make Button Text White
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text("SIZE", button_x, button_y);
+
+  // DISTANCE INDICATOR
+
+  color color2;
+  if (!closeDist()){
+    color2 = color(255, 0, 0);
+  }
+  else{
+    color2 = color(0, 255, 0);
+  }
+  fill(color2);
+  int button_width2 = 75;
+  int button_height2 = 45;
+  int button_x2 = 60;
+  int button_y2 = height/2;
+  rect(button_x2, button_y2, button_width2, button_height2);
+
+  // Make Button Text White
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text("PLACE", button_x2, button_y2);
+
+  // ROTATION INDICATOR
+
+  color color3;
+  if (!closeRotation()){
+    color3 = color(255, 0, 0);
+  }
+  else{
+    color3 = color(0, 255, 0);
+  }
+  fill(color3);
+  int button_width3 = 75;
+  int button_height3 = 45;
+  int button_x3 = 60;
+  int button_y3 = height/2 + 50;
+  rect(button_x3, button_y3, button_width3, button_height3);
+
+  // Make Button Text White
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text("ANGLE", button_x3, button_y3);
+  
+
+  //===========DRAW SUBMIT BUTTON=====================
+  if (!checkForSuccess()){
+    button_color = color(255, 0, 0);
+  }
+  else{
+    button_color = color(0, 255, 0);
+  }
+  fill(button_color);
+  int submit_button_width = 75;
+  int submit_button_height = 45;
+  int submit_button_x = button_x3;
+  int submit_button_y = height/2 + 100;
+  rect(submit_button_x, submit_button_y, submit_button_width, submit_button_height);
+  
+  // Make Button Text White
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text("Submit", submit_button_x, submit_button_y);
 }
 
 //my example design for control, which is terrible
 void scaffoldControlLogic()
 {
+
   //upper left corner, rotate counterclockwise
+  /*
   text("CCW", inchToPix(.4f), inchToPix(.4f));
   if (mousePressed && dist(0, 0, mouseX, mouseY)<inchToPix(.8f))
     logoRotation--;
@@ -117,7 +269,7 @@ void scaffoldControlLogic()
   //upper right corner, rotate clockwise
   text("CW", width-inchToPix(.4f), inchToPix(.4f));
   if (mousePressed && dist(width, 0, mouseX, mouseY)<inchToPix(.8f))
-    logoRotation++;
+    logoRotation++; */
 
   //lower left corner, decrease Z
   text("-", inchToPix(.4f), height-inchToPix(.4f));
@@ -125,11 +277,12 @@ void scaffoldControlLogic()
     logoZ = constrain(logoZ-inchToPix(.02f), .01, inchToPix(4f)); //leave min and max alone!
 
   //lower right corner, increase Z
-  text("+", width-inchToPix(.4f), height-inchToPix(.4f));
+  text("+",width-inchToPix(.4f), height-inchToPix(.4f));
   if (mousePressed && dist(width, height, mouseX, mouseY)<inchToPix(.8f))
     logoZ = constrain(logoZ+inchToPix(.02f), .01, inchToPix(4f)); //leave min and max alone! 
 
   //left middle, move left
+  /*
   text("left", inchToPix(.4f), height/2);
   if (mousePressed && dist(0, height/2, mouseX, mouseY)<inchToPix(.8f))
     logoX-=inchToPix(.02f);
@@ -145,6 +298,7 @@ void scaffoldControlLogic()
   text("down", width/2, height-inchToPix(.4f));
   if (mousePressed && dist(width/2, height, mouseX, mouseY)<inchToPix(.8f))
     logoY+=inchToPix(.02f);
+    */
 }
 
 void mousePressed()
@@ -154,15 +308,79 @@ void mousePressed()
     startTime = millis();
     println("time started!");
   }
+
+  float halfSize = logoZ / 2;
+  // four corners
+  float topLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY - halfSize);
+  float topRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY - halfSize);
+  float bottomLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY + halfSize);
+  float bottomRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY + halfSize);
+  
+  // checking if close to any corner
+  if (topLeftDist < 10 || topRightDist < 10 || bottomLeftDist < 10 || bottomRightDist < 10) {
+    resizing = true;
+    dragging = false;
+    rotating = false;
+  }
+  
+  // if it's not a resizing then it's a dragndrop
+  else if (mouseX > logoX - halfSize && mouseX < logoX + halfSize && mouseY > logoY - halfSize && mouseY < logoY + halfSize) {
+    dragging = true;
+    resizing = false;
+    rotating = false;
+    offsetX = mouseX - logoX;
+    offsetY = mouseY - logoY;
+  } else { // if it's rotating
+    float buttonSize = max(logoZ / 2, minButtonSize);
+    rotateButtonX = logoX;
+    rotateButtonY = logoY - logoZ / 2 - buttonSize / 2; 
+    float distance = dist(mouseX, mouseY, rotateButtonX, rotateButtonY);
+    if (distance < buttonSize / 2) {
+      rotating = true;
+      dragging = false;
+      resizing = false;
+      if (mouseX < rotateButtonX) {
+        logoRotation -= 8; // Adjust the rotation speed as needed
+      } else {
+        logoRotation += 8; // Adjust the rotation speed as needed
+      }
+     }
+  }
+}
+
+void mouseDragged() {
+  if (resizing == true) {
+    float newHalfSize = dist(mouseX, mouseY, logoX, logoY) / 2;
+    logoZ = newHalfSize * 2;
+  }
+  if (dragging == true && resizing == false && rotating == false) {
+    // takes into account mouse position vs logo position
+    logoX = mouseX - offsetX;
+    logoY = mouseY - offsetY;
+  }
 }
 
 void mouseReleased()
 {
+  resizing = false;
+  dragging = false;
+  rotating = false;
+  int submit_button_width = 75;
+  int submit_button_height = 45;
+  int submit_button_x = 60;
+  int submit_button_y = height/2 + 100;
   //check to see if user clicked middle of screen within 3 inches, which this code uses as a submit button
-  if (dist(width/2, height/2, mouseX, mouseY)<inchToPix(3f))
-  {
-    if (userDone==false && !checkForSuccess())
+  if ( (mouseX >= submit_button_x-submit_button_width/2 && mouseX <= (submit_button_x + submit_button_width/2)) && 
+      (mouseY >= submit_button_y-submit_button_height/2 && mouseY <= (submit_button_y + submit_button_height/2)) )
+  { 
+    if (userDone==false && !checkForSuccess()) {
+      miss.play();
       errorCount++;
+    }
+    else {
+      hit.play();
+      successes++;
+    }
 
     trialIndex++; //and move on to next trial
 
@@ -174,13 +392,37 @@ void mouseReleased()
   }
 }
 
+public boolean closeDist()
+{
+  Destination d = destinations.get(trialIndex);  
+  boolean closeDist = dist(d.x, d.y, logoX, logoY)<inchToPix(.05f); //has to be within +-0.05"
+
+  return closeDist;
+}
+
+public boolean closeRotation()
+{
+  Destination d = destinations.get(trialIndex);  
+  boolean closeRotation = calculateDifferenceBetweenAngles(d.rotation, logoRotation)<=5;
+
+  return closeRotation;
+}
+
+public boolean closeZ()
+{
+  Destination d = destinations.get(trialIndex);  
+  boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"  
+
+  return closeZ;
+}
+
 //probably shouldn't modify this, but email me if you want to for some good reason.
 public boolean checkForSuccess()
 {
-  Destination d = destinations.get(trialIndex);	
+  Destination d = destinations.get(trialIndex);  
   boolean closeDist = dist(d.x, d.y, logoX, logoY)<inchToPix(.05f); //has to be within +-0.05"
   boolean closeRotation = calculateDifferenceBetweenAngles(d.rotation, logoRotation)<=5;
-  boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"	
+  boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"  
 
   println("Close Enough Distance: " + closeDist + " (logo X/Y = " + d.x + "/" + d.y + ", destination X/Y = " + logoX + "/" + logoY +")");
   println("Close Enough Rotation: " + closeRotation + " (rot dist="+calculateDifferenceBetweenAngles(d.rotation, logoRotation)+")");
