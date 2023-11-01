@@ -1,4 +1,4 @@
-import processing.sound.*;
+import import processing.sound.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -8,6 +8,7 @@ int index = 0; //starts at zero-ith trial
 float border = 0; //some padding from the sides of window, set later
 int trialCount = 12; //this will be set higher for the bakeoff
 int trialIndex = 0; //what trial are we on
+int successes = 0; //used to keep track of number of successes
 int errorCount = 0;  //used to keep track of errors
 float errorPenalty = 0.5f; //for every error, add this value to mean time
 int startTime = 0; // time starts when the first click is captured
@@ -51,6 +52,9 @@ void setup() {
   
   //don't change this! 
   border = inchToPix(2f); //padding of 1.0 inches
+  
+  hit = new SoundFile(this, "hit_sound.wav");
+  miss = new SoundFile(this, "miss_sound.wav");
 
   for (int i=0; i<trialCount; i++) //don't change this! 
   {
@@ -347,9 +351,10 @@ void mouseReleased()
   if ( (mouseX >= submit_button_x-submit_button_width/2 && mouseX <= (submit_button_x + submit_button_width/2)) && 
       (mouseY >= submit_button_y-submit_button_height/2 && mouseY <= (submit_button_y + submit_button_height/2)) )
   {
-    if (userDone==false && !checkForSuccess())
-      miss.play()
+    if (userDone==false && !checkForSuccess()) {
+      miss.play();
       errorCount++;
+    }
     else {
       hit.play();
       successes++;
