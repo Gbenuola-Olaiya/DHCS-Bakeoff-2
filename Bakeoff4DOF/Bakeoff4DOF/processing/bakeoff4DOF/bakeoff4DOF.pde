@@ -34,6 +34,13 @@ boolean resizing = false;
 boolean rotating = false;
 float offsetX, offsetY;
 
+// corners for resizing
+float halfSize; 
+float topLeftDist;
+float topRightDist; 
+float bottomLeftDist; 
+float bottomRightDist; 
+
 private class Destination
 {
   float x = 0;
@@ -254,6 +261,20 @@ void draw() {
   fill(255);
   textAlign(CENTER, CENTER);
   text("Submit", submit_button_x, submit_button_y);
+  
+  fill(#FFC300);
+  int resize_button_width = 75;
+  int resize_button_height = 45;
+  int resize_button_x = width - button_x3;
+  int resize_button_y = height/2;
+  rect(resize_button_x, resize_button_y, resize_button_width, resize_button_height);
+  
+  halfSize = logoZ / 2;
+  // four corners
+  topLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY - halfSize);
+  topRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY - halfSize);
+  bottomLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY + halfSize);
+  bottomRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY + halfSize);
 }
 
 //my example design for control, which is terrible
@@ -308,13 +329,13 @@ void mousePressed()
     startTime = millis();
     println("time started!");
   }
-
-  float halfSize = logoZ / 2;
+  
+  halfSize = logoZ / 2;
   // four corners
-  float topLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY - halfSize);
-  float topRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY - halfSize);
-  float bottomLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY + halfSize);
-  float bottomRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY + halfSize);
+  topLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY - halfSize);
+  topRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY - halfSize);
+  bottomLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY + halfSize);
+  bottomRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY + halfSize);
   
   // checking if close to any corner
   if (topLeftDist < 10 || topRightDist < 10 || bottomLeftDist < 10 || bottomRightDist < 10) {
@@ -324,7 +345,7 @@ void mousePressed()
   }
   
   // if it's not a resizing then it's a dragndrop
-  else if (mouseX > logoX - halfSize && mouseX < logoX + halfSize && mouseY > logoY - halfSize && mouseY < logoY + halfSize) {
+  if (mouseX > logoX - halfSize && mouseX < logoX + halfSize && mouseY > logoY - halfSize && mouseY < logoY + halfSize) {
     dragging = true;
     resizing = false;
     rotating = false;
@@ -362,7 +383,16 @@ void mouseDragged() {
 
 void mouseReleased()
 {
-  resizing = false;
+  int resize_button_width = 75;
+  int resize_button_height = 45;
+  int resize_button_x = width - 75;
+  int resize_button_y = height/2;
+  if ( (mouseX >= resize_button_x-resize_button_width/2 && mouseX <= (resize_button_x + resize_button_width/2)) && 
+      (mouseY >= resize_button_y-resize_button_height/2 && mouseY <= (resize_button_y + resize_button_height/2)) ){
+     resizing = true;
+     dragging = false;
+     rotating = false;
+  }
   dragging = false;
   rotating = false;
   int submit_button_width = 75;
