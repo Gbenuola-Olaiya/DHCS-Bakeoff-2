@@ -146,25 +146,6 @@ void draw() {
   scaffoldControlLogic(); //you are going to want to replace this!
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchToPix(.8f));
   
-  //===========DRAW SUBMIT BUTTON=====================
-  if (!checkForSuccess()){
-    button_color = color(255, 0, 0);
-  }
-  else{
-    button_color = color(0, 255, 0);
-  }
-  fill(button_color);
-  int submit_button_width = 100;
-  int submit_button_height = 50;
-  int submit_button_x = width/2;
-  int submit_button_y = height/2;
-  rect(submit_button_x, submit_button_y, submit_button_width, submit_button_height);
-  
-  // Make Button Text White
-  fill(255);
-  textAlign(CENTER, CENTER);
-  text("Submit", submit_button_x, submit_button_y);
-  
   //===========DRAW SUCCESSES AND ERRORS=====================
   textAlign(LEFT);
   fill(255);
@@ -269,6 +250,25 @@ void draw() {
   fill(255);
   textAlign(CENTER, CENTER);
   text("ANGLE", button_x3, button_y3);
+  
+  //===========DRAW SUBMIT BUTTON=====================
+  if (!checkForSuccess()){
+    button_color = color(255, 0, 0);
+  }
+  else{
+    button_color = color(0, 255, 0);
+  }
+  fill(button_color);
+  int submit_button_width = 75;
+  int submit_button_height = 45;
+  int submit_button_x = button_x3;
+  int submit_button_y = height/2 + 100;
+  rect(submit_button_x, submit_button_y, submit_button_width, submit_button_height);
+  
+  // Make Button Text White
+  fill(255);
+  textAlign(CENTER, CENTER);
+  text("Submit", submit_button_x, submit_button_y);
 }
 
 //my example design for control, which is terrible
@@ -338,10 +338,10 @@ if (dragging) {
 void mouseReleased()
 {
   dragging = false;
-  int submit_button_width = 100;
-  int submit_button_height = 50;
-  int submit_button_x = width/2;
-  int submit_button_y = height/2;
+  int submit_button_width = 75;
+  int submit_button_height = 45;
+  int submit_button_x = 60;
+  int submit_button_y = height/2 + 100;
   //check to see if user clicked on Submit Button
   if ( (mouseX >= submit_button_x-submit_button_width/2 && mouseX <= (submit_button_x + submit_button_width/2)) && 
       (mouseY >= submit_button_y-submit_button_height/2 && mouseY <= (submit_button_y + submit_button_height/2)) )
