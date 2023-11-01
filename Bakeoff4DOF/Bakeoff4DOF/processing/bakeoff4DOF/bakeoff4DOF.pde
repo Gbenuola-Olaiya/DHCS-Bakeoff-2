@@ -96,6 +96,8 @@ int submit_button_height = 50;
 */
 
 color button_color;
+// Adjust the minimum size for the rotation controls
+final float minButtonSize = 20;
 
 void draw() {
 
@@ -172,7 +174,8 @@ void draw() {
   
   //===========DRAW ROTATE BUTTONS===========================
   // Update button position with logo position
-  float buttonSize = logoZ / 2; // Adjust the size of the button relative to the logo size
+  // Draw circular button with a minimum size
+  float buttonSize = max(logoZ / 2, minButtonSize);
   rotateButtonX = logoX;
   rotateButtonY = logoY - logoZ / 2 - buttonSize / 2; // Adjust the vertical position
 
@@ -182,7 +185,8 @@ void draw() {
 
   // Draw arrow icons for rotating logo square
   fill(0);
-  float arrowSize = buttonSize / 3;
+  // Draw arrow icons for rotating logo square with a minimum size
+  float arrowSize = max(buttonSize / 3, minButtonSize / 3);
   float arrowOffset = buttonSize / 3.25; // Spacing Between Clockwise and Counter Clockwise arrows
   float arrowTopY = rotateButtonY - arrowOffset;
   float arrowLeftX = rotateButtonX - arrowSize / 2;
@@ -389,10 +393,10 @@ public boolean closeZ()
 //probably shouldn't modify this, but email me if you want to for some good reason.
 public boolean checkForSuccess()
 {
-  Destination d = destinations.get(trialIndex);	
+  Destination d = destinations.get(trialIndex);  
   boolean closeDist = dist(d.x, d.y, logoX, logoY)<inchToPix(.05f); //has to be within +-0.05"
   boolean closeRotation = calculateDifferenceBetweenAngles(d.rotation, logoRotation)<=5;
-  boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"	
+  boolean closeZ = abs(d.z - logoZ)<inchToPix(.1f); //has to be within +-0.1"  
 
   println("Close Enough Distance: " + closeDist + " (logo X/Y = " + d.x + "/" + d.y + ", destination X/Y = " + logoX + "/" + logoY +")");
   println("Close Enough Rotation: " + closeRotation + " (rot dist="+calculateDifferenceBetweenAngles(d.rotation, logoRotation)+")");
