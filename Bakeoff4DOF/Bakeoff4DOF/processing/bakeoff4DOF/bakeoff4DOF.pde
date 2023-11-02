@@ -29,17 +29,12 @@ float rotateButtonX = logoX + logoZ / 2 + 30; // Adjust the distance from the lo
 float rotateButtonY = logoY; // Adjust the vertical position as needed
 float rotateButtonSize = 40; // Adjust the size of the button as needed
 
-boolean dragging = false;
-boolean resizing = false;
-boolean rotating = false;
-float offsetX, offsetY;
+float sizeButtonX = logoX + logoZ / 2 + 30; // Adjust the distance from the logo square as needed
+float sizeButtonY = logoY; // Adjust the vertical position as needed
+float sizeButtonSize = 40; // Adjust the size of the button as needed
 
-// corners for resizing
-float halfSize; 
-float topLeftDist;
-float topRightDist; 
-float bottomLeftDist; 
-float bottomRightDist; 
+boolean dragging = false;
+float offsetX, offsetY;
 
 private class Destination
 {
@@ -86,7 +81,7 @@ int submit_button_height = 50;
 
 color button_color;
 // Adjust the minimum size for the rotation controls
-final float minButtonSize = 20;
+final float minButtonSize = 30;
 
 
 void draw() {
@@ -133,14 +128,13 @@ void draw() {
 
   //===========DRAW EXAMPLE CONTROLS=================
   fill(255);
-  scaffoldControlLogic(); //you are going to want to replace this!
   text("Trial " + (trialIndex+1) + " of " +trialCount, width/2, inchToPix(.8f));
 
   //===========DRAW SUCCESSES AND ERRORS=====================
   textAlign(LEFT);
   fill(255);
-  text("Hits: " + successes,40, 60);
-  text("Errors: " + errorCount,40, 80);
+  text("Hits: " + successes,40, 70);
+  text("Errors: " + errorCount,40, 90);
   textAlign(CENTER);
   
   //===========DRAW ROTATE BUTTONS===========================
@@ -168,18 +162,49 @@ void draw() {
   triangle(arrowLeftX + arrowSize / 4, arrowBottomY, arrowRightX + arrowSize / 4, arrowBottomY, rotateButtonX + arrowSize / 4, arrowBottomY + arrowSize / 2);
 
   // Check for button click
-  /*float distance = dist(mouseX, mouseY, rotateButtonX, rotateButtonY);
-  if (distance < buttonSize / 2 && mousePressed && rotating == true) {
+  float distance = dist(mouseX, mouseY, rotateButtonX, rotateButtonY);
+  if (distance < buttonSize / 2 && mousePressed) {
     // Check if the mouse is on the right or left side of the button to determine the direction of rotation
     if (mouseX < rotateButtonX) {
-      logoRotation -= 5; // Adjust the rotation speed as needed
+      logoRotation -= 2; // Adjust the rotation speed as needed
     } else {
-      logoRotation += 5; // Adjust the rotation speed as needed
+      logoRotation += 2; // Adjust the rotation speed as needed
     }
-    rotating = false;
-  }*/
+  }
+  
+  //===========DRAW RESIZE BUTTONS===========================
+  // Update button position with logo position
+  // Draw circular button with a minimum size
+  buttonSize = max(logoZ / 2, minButtonSize);
+  sizeButtonX = logoX;
+  sizeButtonY = logoY + logoZ / 2 + buttonSize/2; // Adjust the vertical position
+
+  // Draw circular button
+  fill(255);
+  ellipse(sizeButtonX, sizeButtonY, buttonSize, buttonSize);
+  
+  stroke(0);
+  line(sizeButtonX-buttonSize/2, sizeButtonY, sizeButtonX+buttonSize/2, sizeButtonY);
+
+  // Draw + and -
+  fill(0);
+  text("-", sizeButtonX, sizeButtonY + buttonSize/3);
+  text("+", sizeButtonX, sizeButtonY-buttonSize/6);
+
+  // Check for button click
+  float distance2 = dist(mouseX, mouseY, sizeButtonX, sizeButtonY);
+  if (distance2 < buttonSize / 2 && mousePressed) {
+    // Check if the mouse is on the top or bottom side of the button to determine the direction of resizing
+    if (mouseY < sizeButtonY) { // +
+      logoZ = constrain(logoZ+inchToPix(.02f), .01, inchToPix(4f));
+    } else { // -
+      logoZ = constrain(logoZ-inchToPix(.02f), .01, inchToPix(4f)); 
+    }
+  }
+  
   
   //===========DRAW INDICATOR BUTTONS=====================
+  stroke(40);
   // SIZE INDICATOR
   color color1;
   if (!closeZ()){
@@ -261,65 +286,6 @@ void draw() {
   fill(255);
   textAlign(CENTER, CENTER);
   text("Submit", submit_button_x, submit_button_y);
-  
-  fill(#FFC300);
-  int resize_button_width = 75;
-  int resize_button_height = 45;
-  int resize_button_x = width - button_x3;
-  int resize_button_y = height/2;
-  rect(resize_button_x, resize_button_y, resize_button_width, resize_button_height);
-  
-  halfSize = logoZ / 2;
-  // four corners
-  topLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY - halfSize);
-  topRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY - halfSize);
-  bottomLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY + halfSize);
-  bottomRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY + halfSize);
-}
-
-//my example design for control, which is terrible
-void scaffoldControlLogic()
-{
-
-  //upper left corner, rotate counterclockwise
-  /*
-  text("CCW", inchToPix(.4f), inchToPix(.4f));
-  if (mousePressed && dist(0, 0, mouseX, mouseY)<inchToPix(.8f))
-    logoRotation--;
-
-  //upper right corner, rotate clockwise
-  text("CW", width-inchToPix(.4f), inchToPix(.4f));
-  if (mousePressed && dist(width, 0, mouseX, mouseY)<inchToPix(.8f))
-    logoRotation++; */
-
-  //lower left corner, decrease Z
-  text("-", inchToPix(.4f), height-inchToPix(.4f));
-  if (mousePressed && dist(0, height, mouseX, mouseY)<inchToPix(.8f))
-    logoZ = constrain(logoZ-inchToPix(.02f), .01, inchToPix(4f)); //leave min and max alone!
-
-  //lower right corner, increase Z
-  text("+",width-inchToPix(.4f), height-inchToPix(.4f));
-  if (mousePressed && dist(width, height, mouseX, mouseY)<inchToPix(.8f))
-    logoZ = constrain(logoZ+inchToPix(.02f), .01, inchToPix(4f)); //leave min and max alone! 
-
-  //left middle, move left
-  /*
-  text("left", inchToPix(.4f), height/2);
-  if (mousePressed && dist(0, height/2, mouseX, mouseY)<inchToPix(.8f))
-    logoX-=inchToPix(.02f);
-
-  text("right", width-inchToPix(.4f), height/2);
-  if (mousePressed && dist(width, height/2, mouseX, mouseY)<inchToPix(.8f))
-    logoX+=inchToPix(.02f);
-
-  text("up", width/2, inchToPix(.4f));
-  if (mousePressed && dist(width/2, 0, mouseX, mouseY)<inchToPix(.8f))
-    logoY-=inchToPix(.02f);
-
-  text("down", width/2, height-inchToPix(.4f));
-  if (mousePressed && dist(width/2, height, mouseX, mouseY)<inchToPix(.8f))
-    logoY+=inchToPix(.02f);
-    */
 }
 
 void mousePressed()
@@ -329,52 +295,19 @@ void mousePressed()
     startTime = millis();
     println("time started!");
   }
-  
-  halfSize = logoZ / 2;
-  // four corners
-  topLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY - halfSize);
-  topRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY - halfSize);
-  bottomLeftDist = dist(mouseX, mouseY, logoX - halfSize, logoY + halfSize);
-  bottomRightDist = dist(mouseX, mouseY, logoX + halfSize, logoY + halfSize);
-  
-  // checking if close to any corner
-  if (topLeftDist < 10 || topRightDist < 10 || bottomLeftDist < 10 || bottomRightDist < 10) {
-    resizing = true;
-    dragging = false;
-    rotating = false;
-  }
-  
-  // if it's not a resizing then it's a dragndrop
+
+  float halfSize = logoZ / 2;
+
+  // dragndrop
   if (mouseX > logoX - halfSize && mouseX < logoX + halfSize && mouseY > logoY - halfSize && mouseY < logoY + halfSize) {
     dragging = true;
-    resizing = false;
-    rotating = false;
     offsetX = mouseX - logoX;
     offsetY = mouseY - logoY;
-  } else { // if it's rotating
-    float buttonSize = max(logoZ / 2, minButtonSize);
-    rotateButtonX = logoX;
-    rotateButtonY = logoY - logoZ / 2 - buttonSize / 2; 
-    float distance = dist(mouseX, mouseY, rotateButtonX, rotateButtonY);
-    if (distance < buttonSize / 2) {
-      rotating = true;
-      dragging = false;
-      resizing = false;
-      if (mouseX < rotateButtonX) {
-        logoRotation -= 8; // Adjust the rotation speed as needed
-      } else {
-        logoRotation += 8; // Adjust the rotation speed as needed
-      }
-     }
   }
 }
 
 void mouseDragged() {
-  if (resizing == true) {
-    float newHalfSize = dist(mouseX, mouseY, logoX, logoY) / 2;
-    logoZ = newHalfSize * 2;
-  }
-  if (dragging == true && resizing == false && rotating == false) {
+  if (dragging == true) {
     // takes into account mouse position vs logo position
     logoX = mouseX - offsetX;
     logoY = mouseY - offsetY;
@@ -383,18 +316,7 @@ void mouseDragged() {
 
 void mouseReleased()
 {
-  int resize_button_width = 75;
-  int resize_button_height = 45;
-  int resize_button_x = width - 75;
-  int resize_button_y = height/2;
-  if ( (mouseX >= resize_button_x-resize_button_width/2 && mouseX <= (resize_button_x + resize_button_width/2)) && 
-      (mouseY >= resize_button_y-resize_button_height/2 && mouseY <= (resize_button_y + resize_button_height/2)) ){
-     resizing = true;
-     dragging = false;
-     rotating = false;
-  }
   dragging = false;
-  rotating = false;
   int submit_button_width = 75;
   int submit_button_height = 45;
   int submit_button_x = 60;
@@ -402,7 +324,7 @@ void mouseReleased()
   //check to see if user clicked middle of screen within 3 inches, which this code uses as a submit button
   if ( (mouseX >= submit_button_x-submit_button_width/2 && mouseX <= (submit_button_x + submit_button_width/2)) && 
       (mouseY >= submit_button_y-submit_button_height/2 && mouseY <= (submit_button_y + submit_button_height/2)) )
-  { 
+  {
     if (userDone==false && !checkForSuccess()) {
       miss.play();
       errorCount++;
