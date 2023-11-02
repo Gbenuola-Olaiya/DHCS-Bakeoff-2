@@ -1,4 +1,4 @@
-import import processing.sound.*;
+import processing.sound.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
