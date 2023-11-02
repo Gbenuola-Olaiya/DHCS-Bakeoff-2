@@ -156,7 +156,7 @@ void draw() {
   float arrowTopY = rotateButtonY - arrowOffset;
   float arrowLeftX = rotateButtonX - arrowSize / 2;
   float arrowRightX = rotateButtonX + arrowSize / 2;
-  float arrowBottomY = rotateButtonY + arrowSize / 2 - arrowOffset;
+  float arrowBottomY = rotateButtonY + arrowSize / 2;
 
   triangle(arrowLeftX - arrowSize / 4, arrowTopY, arrowRightX - arrowSize / 4, arrowTopY, rotateButtonX - arrowSize / 4, arrowTopY - arrowSize / 2);
   triangle(arrowLeftX + arrowSize / 4, arrowBottomY, arrowRightX + arrowSize / 4, arrowBottomY, rotateButtonX + arrowSize / 4, arrowBottomY + arrowSize / 2);
